@@ -6,21 +6,32 @@ import socketio.Packet;
 class Main {
 
     public static function main() {
-        encodeTest();
+        encodeDecodeTest();
     }
 
-    public static function encodeTest() {
+    public static function encodeDecodeTest() {
 
         function check(name: String, p: Packet, expected: String) {
             var result = p.encode();
             if (result != expected) {
                 trace('-----');
-                trace('[\033[31mfailure\033[0;37m] $name');
+                trace('[\033[31mfailure\033[0;37m] (encode) $name');
                 trace('  expected: $expected');
                 trace('       got: $result');
                 trace('-----');
             } else {
-                trace('[\033[32msuccess\033[0;37m] $name ');
+                trace('[\033[32msuccess\033[0;37m] (encode) $name ');
+            }
+
+            result = Packet.decode(expected).encode();
+            if (result != expected) {
+                trace('-----');
+                trace('[\033[31mfailure\033[0;37m] (decode) $name');
+                trace('  expected: $expected');
+                trace('       got: $result');
+                trace('-----');
+            } else {
+                trace('[\033[32msuccess\033[0;37m] (decode) $name ');
             }
         }
 
@@ -72,6 +83,5 @@ class Main {
             "1/admin,"
         );
     }
-
 
 }

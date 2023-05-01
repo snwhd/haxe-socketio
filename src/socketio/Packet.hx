@@ -114,6 +114,7 @@ class Packet {
         var ackNumber: Null<Int> = null;
         if (ackString != "") {
             ackNumber = Std.parseInt(ackString);
+            remaining = remaining.substr(i);
         }
 
         var json: Null<Dynamic> = null;
