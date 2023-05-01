@@ -1,0 +1,6 @@
+-cp src
+-cpp test
+-lib haxe-engineio
+-main socketio.test.Main
+-debug
+-D no-deprecation-warnings
