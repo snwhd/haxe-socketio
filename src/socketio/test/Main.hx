@@ -1,6 +1,7 @@
 package socketio.test;
 
 import socketio.Packet;
+import socketio.Server;
 
 
 class Main {
@@ -8,6 +9,47 @@ class Main {
     public static function main() {
         encodeDecodeTest();
     }
+
+//    public static function serverTest() {
+//        var sio = new Server();
+//
+//        // events
+//        sio.on("my_event", function (sid, data) {
+//            trace('my_event: $sid');
+//        });
+//        sio.on("*", function (event, sid, data) {
+//            trace('$event: $sid');
+//        });
+//
+//        // connect, disconnect are automatic
+//        // return False or throw error in conenct do reject
+//
+//        // emi
+//        sio.emit("my_event", {data: "foobar"});
+//        sio.emit("my_event", {data: "foobar"}, "some_room");
+//
+//        // namespaces
+//        sio.of("/chat").on("my_event", function (sid, data)
+//
+//        // sio.registerNamespace(new CustomNamespace("/test"));
+//    }
+
+/* TODO
+class CustomNamespace extends socketio.Namespace {
+
+    public function on_connect(sid) {
+    }
+
+    public function on_disconnect(sid) {
+    }
+
+    // TODO: macro? how to register?
+    public function on_my_event(sid, data) {
+        self.emite("my_response", data);
+    }
+
+}
+*/
 
     public static function encodeDecodeTest() {
 
