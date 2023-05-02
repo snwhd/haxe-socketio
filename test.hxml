@@ -1,6 +1,7 @@
 -cp src
 -cpp test
 -lib haxe-engineio
+-lib thx.core
 -main socketio.test.Main
 -debug
 -D no-deprecation-warnings

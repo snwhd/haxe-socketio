@@ -38,12 +38,18 @@ class Packet {
         }
 
         this.ackNumber = ackNumber;
-        if (ackNumber == null && requestAck) {
+        if (requestAck) {
+            this.requestAck();
+        }
+    }
+
+    public function requestAck() {
+        if (this.ackNumber == null) {
             this.ackNumber = Packet.nextAckId++;
         }
     }
 
-    public function encode(b64=false) : String {
+    public function encode() : String {
         var typeInt: Int = this.type;
         var nAttachments = "";
         if (this.attachments != null && this.attachments.length > 0) {

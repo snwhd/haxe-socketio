@@ -4,26 +4,12 @@ import engineio.Server.ClientInfo as EngineioClientInfo;
 import engineio.StringOrBinary;
 
 
-typedef Room = Dynamic;       // TODO
-typedef Handler = Dynamic;    // TODO
-typedef Middleware = Dynamic; // TODO
-
-typedef Namespace = {
-    rooms: Map<String, Room>,
-    handlers: Map<String, Array<Handler>>,
-    middlewares: Array<Middleware>,
-}
-
-typedef Socket = Dynamic; // TODO
-
-
 class Server {
 
     private var engine: engineio.Server;
     private var namespaces: Map<String, Namespace> = [];
 
     public var debug = true;
-
 
     public function new() {
         this.engine = new engineio.Server();
