@@ -28,7 +28,7 @@ class Adapter {
     }
 
     //
-    // add/remove sockets
+    // add/remove sessions
     //
 
     public function add(sid: SessionID, rooms: Array<Room>) {
@@ -43,15 +43,15 @@ class Adapter {
         }
 
         for (room in rooms) {
-            var socketSet = this.rooms.get(room);
-            if (socketSet == null) {
-                socketSet = Set.createString();
-                this.rooms[room] = socketSet;
+            var sessions = this.rooms.get(room);
+            if (sessions == null) {
+                sessions = Set.createString();
+                this.rooms[room] = sessions;
                 // TODO: emit create-room
             }
 
-            if (!socketSet.exists(sid)) {
-                socketSet.add(sid);
+            if (!sessions.exists(sid)) {
+                sessions.add(sid);
                 // TODO: emit join-room
             }
         }
@@ -77,12 +77,12 @@ class Adapter {
     }
 
     private function deleteFromRoom(room: Room, sid: SessionID) {
-        var socketSet = this.rooms.get(room);
-        if (socketSet != null) {
-            if (socketSet.remove(sid)) {
+        var sessions = this.rooms.get(room);
+        if (sessions != null) {
+            if (sessions.remove(sid)) {
                 // TODO: emit leave-room
             }
-            if (socketSet.length == 0 && this.rooms.remove(room)) {
+            if (sessions.length == 0 && this.rooms.remove(room)) {
                 // TODO: emit delete-room
             }
         }
@@ -99,41 +99,34 @@ class Adapter {
     ): Void {
         packet.namespace = this.namespace.name;
         var data = packet.encode();
-        this.apply(options, function (socket) {
-            // TODO: send
-            // socket.sendStringMessage(data)
-            trace('to(${socket.id}): $data');
+        this.apply(options, function (sid) {
+            this.namespace.server.sendString(sid, data);
+            trace('to(${sid}): $data');
         });
     }
 
     private function apply(
         options: BroadcastOptions,
-        callback: (Socket) -> Void
+        callback: (SessionID) -> Void
     ): Void {
         var globalBroadcast = options.rooms.length == 0;
         if (globalBroadcast) {
             for (sid in this.sids) {
                 if (options.except.exists(sid)) continue;
-                var socket = this.getSocket(sid);
-                if (socket != null) callback(socket);
+                callback(sid);
             }
         } else {
             var sent = Set.createString();
             for (room in options.rooms) {
-                var socketSet = this.rooms.get(room);
-                if (socketSet != null) for (sid in socketSet) {
+                var sessions = this.rooms.get(room);
+                if (sessions != null) for (sid in sessions) {
                     if (!sent.exists(sid)) {
                         sent.add(sid);
-                        var socket = this.getSocket(sid);
-                        if (socket != null) callback(socket);
+                        callback(sid);
                     }
                 }
             }
         }
-    }
-
-    private function getSocket(sid: SessionID): Socket {
-        return this.namespace.sockets.get(sid);
     }
 
 }

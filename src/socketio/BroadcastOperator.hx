@@ -78,7 +78,7 @@ class BroadcastOperator {
     // sockets
     //
 
-    public function fetchSockets(): Array<Socket> {
+    public function fetchSockets(): Array<SessionID> {
         throw "TODO";
     }
 

@@ -10,7 +10,6 @@ import thx.Tuple;
 typedef ClientInfo = {
     eio: EngineioClientInfo,
     sid: SessionID,
-    socket: Socket,
 }
 
 
@@ -36,6 +35,17 @@ class Server {
         this.engine.debug = this.debug;
         this.engine.startMainThread();
         this.engine.startWebsocketThread();
+    }
+
+    //
+    // public api
+    //
+
+    public function sendString(sid: SessionID, data: String) {
+        var client = this.sessions.get(sid);
+        if (client != null) {
+            this.engine.sendStringMessage(client.eio, data);
+        }
     }
 
     //
@@ -70,8 +80,7 @@ class Server {
         // TODO: middlewares
 
         var packet = new Packet(CONNECT, {sid: sid});
-        trace('sending: 4${packet.encode()}');
-        client.socket.sendPacket(packet);
+        this.engine.sendStringMessage(eioClient, packet.encode());
     }
 
     private function handleDisconnect(
@@ -109,7 +118,6 @@ class Server {
         packet: Packet
     ): Void {
     }
-
 
     //
     // engine.io callbacks
@@ -187,15 +195,9 @@ class Server {
         var sid = this.generateSid();
         _debug('Creating New Session: ${sid} (${eioClient.sid}, ${namespace.name})');
 
-        var socket = new Socket(sid, namespace.adapter);
-        socket.sendPacket = function (p) {
-            this.engine.sendStringMessage(eioClient, p.encode());
-        };
-
         clientInfo = {
             sid: sid,
             eio: eioClient,
-            socket: socket,
         };
 
         if (sessionIds != null) {
@@ -213,7 +215,7 @@ class Server {
         var namespace = this.namespaces.get(name);
         if (namespace == null) {
             _debug('Creating Namespace: $name');
-            namespace = new Namespace(name);
+            namespace = new Namespace(this, name);
             this.namespaces[name] = namespace;
         }
         return namespace;

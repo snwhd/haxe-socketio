@@ -1,46 +1,46 @@
 package socketio;
 
-typedef Middleware = Dynamic;
+import thx.Set;
 
-typedef EventListener = (Socket, Dynamic) -> Void;
+typedef Middleware = Dynamic;
+typedef EventListener = (SessionID, Dynamic) -> Void;
 
 
 class Namespace {
 
-    public var adapter: Adapter;
     public var name (default, null): String;
-    public var sockets: Map<String, Socket> = [];
+    public var adapter: Adapter;
+    public var server: Server;
 
     private var middlewares: Array<Middleware>;
     private var handlers: Map<String, Array<EventListener>>;
 
-    public function new(name: String) {
+    public var sessions: Set<SessionID>;
+
+    public function new(server: Server, name: String) {
+        this.sessions = Set.createString();
         this.adapter = new Adapter(this);
+        this.server = server;
         this.name = name;
     }
 
     //
-    // sockets
+    // sessions
     //
 
-    public function addSocket(socket: Socket) {
-        this.sockets[socket.id] = socket;
+    public function addSession(session: SessionID) {
+        this.sessions.add(session);
     }
 
-    public function fetchSockets(): Array<Socket> {
+    public function allJoin(rooms: Array<String>) {
         throw "TODO";
     }
 
-    public function socketsJoin(rooms: Array<String>) {
+    public function allLeave(rooms: Array<String>) {
         throw "TODO";
     }
 
-    public function socketsLeave(rooms: Array<String>) {
-        throw "TODO";
-    }
-
-    // disconnect all sockets, optionally close underlying connection
-    public function disconnectSockets(?close=false) {
+    public function disconnectAll(?close=false) {
         throw "TODO";
     }
 

@@ -3,7 +3,6 @@ package socketio.test;
 import socketio.Packet;
 import socketio.Server;
 
-import socketio.Socket;
 import socketio.Namespace;
 import socketio.BroadcastOperator;
 
@@ -20,14 +19,6 @@ class Main {
         while (true) {
             Sys.sleep(0.1);
         }
-
-        // var namespace = new Namespace("/");
-
-        // var socket = new Socket("asdf", namespace.adapter);
-        // namespace.addSocket(socket);
-        // socket.join("one");
-
-        // namespace.to(["one", "two", "three"]).except(["two"]).emit("my_event", {});
     }
 
 //    public static function serverTest() {
