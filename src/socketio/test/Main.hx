@@ -17,6 +17,21 @@ class Main {
     public static function serverTest() {
         var sio = new Server();
 
+        // special events fired by the server
+        sio.on("connect", function (sid, data) {
+            trace('$sid connected');
+        });
+
+        sio.on("create-room", function(sid, data) {
+            trace('created room: ${data.room}');
+        });
+
+        sio.on("join-room", function(sid, data) {
+            trace('$sid joined room: ${data.room}');
+        });
+
+        // TODO: disconnect, create-room, leave-room, delete-room
+
         // events
         sio.on("test_event", function (sid, data) {
             trace('Test Event From $sid');

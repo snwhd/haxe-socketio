@@ -47,12 +47,16 @@ class Adapter {
             if (sessions == null) {
                 sessions = Set.createString();
                 this.rooms[room] = sessions;
-                // TODO: emit create-room
+                this.namespace.handleEvent(null, "create-room", {
+                    room: room,
+                });
             }
 
             if (!sessions.exists(sid)) {
                 sessions.add(sid);
-                // TODO: emit join-room
+                this.namespace.handleEvent(sid, "join-room", {
+                    room: room,
+                });
             }
         }
     }
@@ -80,10 +84,14 @@ class Adapter {
         var sessions = this.rooms.get(room);
         if (sessions != null) {
             if (sessions.remove(sid)) {
-                // TODO: emit leave-room
+                this.namespace.handleEvent(sid, "leave-room", {
+                    room: room,
+                });
             }
             if (sessions.length == 0 && this.rooms.remove(room)) {
-                // TODO: emit delete-room
+                this.namespace.handleEvent(null, "create-room", {
+                    room: room,
+                });
             }
         }
     }

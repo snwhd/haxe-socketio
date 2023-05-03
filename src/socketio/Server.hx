@@ -35,7 +35,6 @@ class Server {
         this.engine.onMessage = this.engineMessage;
         this.engine.onClosed = this.engineClosed;
 
-        this.engine.debug = this.debug;
         this.engine.startMainThread();
         this.engine.startWebsocketThread();
     }
@@ -128,6 +127,9 @@ class Server {
             // TODO: does socketio support more objects?
             _debug("Extra Data in Event Packet");
         }
+
+        // TODO: prevent special events connect, disconnect,
+        //       join-room, leave-room, create-room, delete-room
 
         namespace.handleEvent(sid, event_name, obj);
     }
@@ -243,8 +245,7 @@ class Server {
         // new namespace connection
         var sid = this.generateSid();
         namespace.addSession(sid);
-
-        _debug('Created New Session: ${sid} (${eioClient.sid}, ${namespace.name})');
+        namespace.handleEvent(sid, "connect", null);
 
         if (sessionIds != null) {
             // existing websocket connection
