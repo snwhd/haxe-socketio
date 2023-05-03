@@ -66,9 +66,8 @@ class BroadcastOperator {
             }
         }
 
-        var packet = new Packet(EVENT, ["TODO"]);
+        var packet = new Packet(EVENT, [eventName, args]);
         this.adapter.broadcast(packet, opts);
-        // trace('Emitting "$eventName" to $rooms');
     }
 
     public function emitWithAck(eventName: String, args: Dynamic) {

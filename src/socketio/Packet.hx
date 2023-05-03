@@ -6,11 +6,10 @@ class Packet {
     private static var nextAckId = 1;
 
     public var type (default, null): PacketType;
-    public var namespace (default, null) = "/";
     public var ackNumber (default, null): Null<Int> = null;
-
     public var json (default, null): Dynamic;
 
+    public var namespace  = "/";
     public var nAttachments: Int = 0;
     public var attachments: Array<haxe.io.Bytes>;
 

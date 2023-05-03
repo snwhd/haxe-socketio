@@ -16,13 +16,18 @@ class Main {
     }
 
     public static function broadcastOperatorTest() {
-        var namespace = new Namespace("/");
+        var server = new Server();
+        while (true) {
+            Sys.sleep(0.1);
+        }
 
-        var socket = new Socket("asdf", namespace.adapter);
-        namespace.addSocket(socket);
-        socket.join("one");
+        // var namespace = new Namespace("/");
 
-        namespace.to(["one", "two", "three"]).except(["two"]).emit("my_event", {});
+        // var socket = new Socket("asdf", namespace.adapter);
+        // namespace.addSocket(socket);
+        // socket.join("one");
+
+        // namespace.to(["one", "two", "three"]).except(["two"]).emit("my_event", {});
     }
 
 //    public static function serverTest() {

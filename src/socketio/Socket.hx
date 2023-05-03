@@ -5,10 +5,10 @@ import haxe.ds.Either;
 
 class Socket {
 
-    public var id (default, null): SocketID;
+    public var id (default, null): SessionID;
     private var adapter: Adapter;
 
-    public function new(id: SocketID, adapter: Adapter) {
+    public function new(id: SessionID, adapter: Adapter) {
         this.adapter = adapter;
         this.id = id;
     }
@@ -19,6 +19,9 @@ class Socket {
             case Right(array): array;
         }
         this.adapter.addAll(this.id, rooms);
+    }
+
+    public dynamic function sendPacket(packet: Packet) {
     }
 
 }

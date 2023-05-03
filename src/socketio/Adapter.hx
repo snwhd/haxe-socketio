@@ -11,8 +11,8 @@ typedef BroadcastOptions = {
 
 class Adapter {
 
-    private var rooms: Map<Room, Set<SocketID>> = [];
-    private var sids: Map<SocketID, Set<Room>> = [];
+    private var rooms: Map<Room, Set<SessionID>> = [];
+    private var sids: Map<SessionID, Set<Room>> = [];
     private var namespace: Namespace;
 
     public function new(namespace: Namespace) {
@@ -31,11 +31,11 @@ class Adapter {
     // add/remove sockets
     //
 
-    public function add(sid: SocketID, rooms: Array<Room>) {
+    public function add(sid: SessionID, rooms: Array<Room>) {
         this.addAll(sid, rooms);
     }
 
-    public function addAll(sid: SocketID, rooms: Array<Room>) {
+    public function addAll(sid: SessionID, rooms: Array<Room>) {
         var roomSet = this.sids.get(sid);
         if (roomSet == null) {
             roomSet = Set.createString();
@@ -57,7 +57,7 @@ class Adapter {
         }
     }
 
-    public function del(sid: SocketID, room: Room) {
+    public function del(sid: SessionID, room: Room) {
         var roomSet = this.sids.get(sid);
         if (roomSet != null) {
             roomSet.remove(sid);
@@ -66,7 +66,7 @@ class Adapter {
         this.deleteFromRoom(room, sid);
     }
 
-    public function delAll(sid: SocketID) {
+    public function delAll(sid: SessionID) {
         var roomSet = this.sids.get(sid);
         if (roomSet != null) {
             for (room in roomSet) {
@@ -76,7 +76,7 @@ class Adapter {
         }
     }
 
-    private function deleteFromRoom(room: Room, sid: SocketID) {
+    private function deleteFromRoom(room: Room, sid: SessionID) {
         var socketSet = this.rooms.get(room);
         if (socketSet != null) {
             if (socketSet.remove(sid)) {
@@ -97,6 +97,7 @@ class Adapter {
         options: BroadcastOptions,
         ?flags: Dynamic // TODO: flags
     ): Void {
+        packet.namespace = this.namespace.name;
         var data = packet.encode();
         this.apply(options, function (socket) {
             // TODO: send
@@ -131,7 +132,7 @@ class Adapter {
         }
     }
 
-    private function getSocket(sid: SocketID): Socket {
+    private function getSocket(sid: SessionID): Socket {
         return this.namespace.sockets.get(sid);
     }
 

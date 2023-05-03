@@ -3,28 +3,113 @@ package socketio;
 import engineio.Server.ClientInfo as EngineioClientInfo;
 import engineio.StringOrBinary;
 
+import thx.Set;
+import thx.Tuple;
+
+
+typedef ClientInfo = {
+    eio: EngineioClientInfo,
+    sid: SessionID,
+    socket: Socket,
+}
+
 
 class Server {
+
+    private static var SID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYA0123456789";
 
     private var engine: engineio.Server;
     private var namespaces: Map<String, Namespace> = [];
 
+    private var sessions: Map<SessionID, ClientInfo> = [];
+    private var eioToSio: Map<SessionID, Array<Tuple2<SessionID, String>>> = [];
+
     public var debug = true;
 
     public function new() {
-        this.engine = new engineio.Server();
+        this.engine = new engineio.Server(null, "/socket.io/");
         this.engine.onOpened = this.engineOpened;
         this.engine.onUpgraded = this.engineUpgraded;
         this.engine.onMessage = this.engineMessage;
         this.engine.onClosed = this.engineClosed;
+
+        this.engine.debug = this.debug;
+        this.engine.startMainThread();
+        this.engine.startWebsocketThread();
     }
+
+    //
+    // packet handling
+    //
 
     private function handlePacket(
         eioClient: EngineioClientInfo,
         packet: Packet
     ): Void {
-        _debug('received packet: ${packet.type}');
+        _debug('Handling Packet from ${eioClient.sid} ${packet.type}');
+        switch (packet.type) {
+            case CONNECT:       this.handleConnect(eioClient, packet);
+            case DISCONNECT:    this.handleDisconnect(eioClient, packet);
+            case EVENT:         this.handleEvent(eioClient, packet);
+            case ACK:           this.handleAck(eioClient, packet);
+            case CONNECT_ERROR: this.handleConnect_error(eioClient, packet);
+            case BINARY_EVENT:  this.handleBinary_event(eioClient, packet);
+            case BINARY_ACK:    this.handleBinary_ack(eioClient, packet);
+        }
     }
+
+
+    private function handleConnect(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+        var namespace = this.getOrCreateNamespace(packet.namespace);
+        var client = this.getOrCreateClient(eioClient, namespace);
+        var sid = client.sid;
+
+        // TODO: middlewares
+
+        var packet = new Packet(CONNECT, {sid: sid});
+        trace('sending: 4${packet.encode()}');
+        client.socket.sendPacket(packet);
+    }
+
+    private function handleDisconnect(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+    }
+
+    private function handleEvent(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+    }
+
+    private function handleAck(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+    }
+
+    private function handleConnect_error(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+    }
+
+    private function handleBinary_event(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+    }
+
+    private function handleBinary_ack(
+        eioClient: EngineioClientInfo,
+        packet: Packet
+    ): Void {
+    }
+
 
     //
     // engine.io callbacks
@@ -63,6 +148,75 @@ class Server {
         #if debug
         if (this.debug) trace(s);
         #end
+    }
+
+    private function generateSid(): SessionID {
+        function nextSid() {
+            var sid = "";
+            for (i in 0 ... 20) {
+                var j = Math.floor(Math.random() * SID_CHARS.length);
+                sid += SID_CHARS.charAt(j);
+            }
+            return sid;
+        }
+
+        var sid = nextSid();
+        while (this.sessions.exists(sid)) {
+            sid = nextSid();
+        }
+
+        return sid;
+    }
+
+    private function getOrCreateClient(
+        eioClient: EngineioClientInfo,
+        namespace: Namespace
+    ): ClientInfo {
+        var clientInfo: ClientInfo;
+
+        var sessionIds = this.eioToSio.get(eioClient.sid);
+        if (sessionIds != null) {
+            for (pair in sessionIds) {
+                if (pair.right == namespace.name) {
+                    return this.sessions[pair.left];
+                }
+            }
+        }
+
+        // new namespace connection
+        var sid = this.generateSid();
+        _debug('Creating New Session: ${sid} (${eioClient.sid}, ${namespace.name})');
+
+        var socket = new Socket(sid, namespace.adapter);
+        socket.sendPacket = function (p) {
+            this.engine.sendStringMessage(eioClient, p.encode());
+        };
+
+        clientInfo = {
+            sid: sid,
+            eio: eioClient,
+            socket: socket,
+        };
+
+        if (sessionIds != null) {
+            // existing websocket connection
+            sessionIds.push(new Tuple2(sid, namespace.name));
+        } else {
+            // totally new client
+            this.eioToSio[eioClient.sid] = [new Tuple2(sid, namespace.name)];
+        }
+
+        return clientInfo;
+    }
+
+    private function getOrCreateNamespace(name: String) {
+        var namespace = this.namespaces.get(name);
+        if (namespace == null) {
+            _debug('Creating Namespace: $name');
+            namespace = new Namespace(name);
+            this.namespaces[name] = namespace;
+        }
+        return namespace;
     }
 
 }
