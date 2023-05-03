@@ -11,27 +11,20 @@ class Main {
 
     public static function main() {
         // encodeDecodeTest();
-        broadcastOperatorTest();
+        serverTest();
     }
 
-    public static function broadcastOperatorTest() {
-        var server = new Server();
-        while (true) {
-            Sys.sleep(0.1);
-        }
-    }
+    public static function serverTest() {
+        var sio = new Server();
 
-//    public static function serverTest() {
-//        var sio = new Server();
-//
-//        // events
-//        sio.on("my_event", function (sid, data) {
-//            trace('my_event: $sid');
-//        });
-//        sio.on("*", function (event, sid, data) {
-//            trace('$event: $sid');
-//        });
-//
+        // events
+        sio.on("test_event", function (sid, data) {
+            trace('Test Event From $sid');
+        });
+        sio.onCatchAll(function (event, sid, data) {
+            trace('$event: $sid');
+        });
+
 //        // connect, disconnect are automatic
 //        // return False or throw error in conenct do reject
 //
@@ -43,7 +36,7 @@ class Main {
 //        sio.of("/chat").on("my_event", function (sid, data)
 //
 //        // sio.registerNamespace(new CustomNamespace("/test"));
-//    }
+    }
 
 /* TODO
 class CustomNamespace extends socketio.Namespace {

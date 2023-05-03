@@ -19,6 +19,7 @@ class Server {
 
     private var engine: engineio.Server;
     private var namespaces: Map<String, Namespace> = [];
+    private var globalNamespace: Namespace;
 
     private var sessions: Map<SessionID, ClientInfo> = [];
     private var eioToSio: Map<SessionID, Array<Tuple2<SessionID, String>>> = [];
@@ -26,6 +27,8 @@ class Server {
     public var debug = true;
 
     public function new() {
+        this.globalNamespace = this.getOrCreateNamespace("/");
+
         this.engine = new engineio.Server(null, "/socket.io/");
         this.engine.onOpened = this.engineOpened;
         this.engine.onUpgraded = this.engineUpgraded;
@@ -93,6 +96,40 @@ class Server {
         eioClient: EngineioClientInfo,
         packet: Packet
     ): Void {
+        var namespace = this.namespaces.get(packet.namespace);
+        if (namespace == null) {
+            _debug("No Such Namespace");
+            return;
+        }
+
+        var sid = this.getSidFromEio(eioClient, packet.namespace);
+        if (sid == null || !namespace.sessions.exists(sid)) {
+            _debug("SID not in Namespace");
+            return;
+        }
+
+        var data: Dynamic = packet.json;
+        if (!Std.isOfType(data, Array) || data.length == 0) {
+            _debug("Invalid Event Data");
+            return;
+        }
+
+        var event_name: Dynamic = data.shift();
+        if (!Std.isOfType(event_name, String)) {
+            _debug("Invalid Event (not string)");
+            return;
+        }
+
+        var obj: Dynamic = null;
+        if (data.length > 0) {
+            obj = data.shift();
+        }
+        if (data.length > 0) {
+            // TODO: does socketio support more objects?
+            _debug("Extra Data in Event Packet");
+        }
+
+        namespace.handleEvent(sid, event_name, obj);
     }
 
     private function handleAck(
@@ -149,6 +186,18 @@ class Server {
     }
 
     //
+    // global namespace passthrough
+    //
+
+    public function on(eventName: String, handler) {
+        this.globalNamespace.on(eventName, handler);
+    }
+
+    public function onCatchAll(handler) {
+        this.globalNamespace.onCatchAll(handler);
+    }
+
+    //
     // util
     //
 
@@ -193,12 +242,9 @@ class Server {
 
         // new namespace connection
         var sid = this.generateSid();
-        _debug('Creating New Session: ${sid} (${eioClient.sid}, ${namespace.name})');
+        namespace.addSession(sid);
 
-        clientInfo = {
-            sid: sid,
-            eio: eioClient,
-        };
+        _debug('Created New Session: ${sid} (${eioClient.sid}, ${namespace.name})');
 
         if (sessionIds != null) {
             // existing websocket connection
@@ -208,7 +254,10 @@ class Server {
             this.eioToSio[eioClient.sid] = [new Tuple2(sid, namespace.name)];
         }
 
-        return clientInfo;
+        return {
+            sid: sid,
+            eio: eioClient,
+        };
     }
 
     private function getOrCreateNamespace(name: String) {
@@ -219,6 +268,16 @@ class Server {
             this.namespaces[name] = namespace;
         }
         return namespace;
+    }
+
+    private function getSidFromEio(eio: EngineioClientInfo, namespace: String) {
+        var sessions = this.eioToSio.get(eio.sid);
+        if (sessions != null) for (session in sessions) {
+            if (session.right == namespace) {
+                return session.left;
+            }
+        }
+        return null;
     }
 
 }
