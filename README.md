@@ -1,6 +1,6 @@
 # haxe-socketio
 
-A Haxe implementation of the socket.io protocol.
+A (work in progress) Haxe implementation of the socket.io protocol.
 
 ## Install
 ```
