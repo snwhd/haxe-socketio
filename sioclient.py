@@ -10,6 +10,11 @@ def test_event(data):
     print(f"test: {data}")
 
 
+@sio.on("*")
+def catch_all(event, data):
+    print(f"{event} - {data}");
+
+
 @sio.event
 def connect():
     print(f"connected: {sio.sid}")

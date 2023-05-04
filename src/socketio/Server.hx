@@ -190,8 +190,12 @@ class Server {
     }
 
     //
-    // global namespace passthrough
+    // namespace passthrough
     //
+
+    public function of(namespaceName: String) {
+        return this.namespaces[namespaceName];
+    }
 
     public function on(eventName: String, handler) {
         this.globalNamespace.on(eventName, handler);
@@ -199,6 +203,30 @@ class Server {
 
     public function onCatchAll(handler) {
         this.globalNamespace.onCatchAll(handler);
+    }
+
+    public function emit(eventName: String, data: Dynamic) {
+        this.globalNamespace.emit(eventName, data);
+    }
+
+    public function emitWithAck(eventName: String, data: Dynamic) {
+        this.globalNamespace.emitWithAck(eventName, data);
+    }
+
+    public function use(middlewares) {
+        this.globalNamespace.use(middlewares);
+    }
+
+    public function to(rooms) {
+        return this.globalNamespace.to(rooms);
+    }
+
+    public function except(rooms) {
+        return this.globalNamespace.except(rooms);
+    }
+
+    public function timeout(rooms) {
+        return this.globalNamespace.timeout(rooms);
     }
 
     //
@@ -264,10 +292,12 @@ class Server {
             this.eioToSio[eioClient.sid] = [new Tuple2(sid, namespace.name)];
         }
 
-        return {
+        var client = {
             sid: sid,
             eio: eioClient,
         };
+        this.sessions[sid] = client;
+        return client;
     }
 
     private function getOrCreateNamespace(name: String) {

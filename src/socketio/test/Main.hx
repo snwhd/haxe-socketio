@@ -36,22 +36,12 @@ class Main {
         // events
         sio.on("test_event", function (sid, data) {
             trace('Test Event From $sid');
+            sio.emit("server_event", {data: "foobar"});
+            sio.of("/").emit("of_event", {data: "asdf"});
         });
         sio.onCatchAll(function (event, sid, data) {
             trace('$event: $sid');
         });
-
-//        // connect, disconnect are automatic
-//        // return False or throw error in conenct do reject
-//
-//        // emi
-//        sio.emit("my_event", {data: "foobar"});
-//        sio.emit("my_event", {data: "foobar"}, "some_room");
-//
-//        // namespaces
-//        sio.of("/chat").on("my_event", function (sid, data)
-//
-//        // sio.registerNamespace(new CustomNamespace("/test"));
     }
 
     public static function encodeDecodeTest() {

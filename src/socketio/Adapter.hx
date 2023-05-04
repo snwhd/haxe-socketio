@@ -109,7 +109,6 @@ class Adapter {
         var data = packet.encode();
         this.apply(options, function (sid) {
             this.namespace.server.sendString(sid, data);
-            trace('to(${sid}): $data');
         });
     }
 
@@ -119,7 +118,7 @@ class Adapter {
     ): Void {
         var globalBroadcast = options.rooms.length == 0;
         if (globalBroadcast) {
-            for (sid in this.sids) {
+            for (sid in this.sids.keys()) {
                 if (options.except.exists(sid)) continue;
                 callback(sid);
             }
