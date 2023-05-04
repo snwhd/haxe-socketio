@@ -26,7 +26,7 @@ class Server {
     private var sessions: Map<SessionID, ClientInfo> = [];
     private var eioToSio: Map<String, Array<Tuple2<SessionID, String>>> = [];
 
-    public var debug = true;
+    public var debug = false;
 
     public function new() {
         this.globalNamespace = this.getOrCreateNamespace("/");
