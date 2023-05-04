@@ -69,7 +69,7 @@ class Adapter {
         }
     }
 
-    public function delAll(sid: SessionID) {
+    public function leaveAll(sid: SessionID) {
         var roomSet = this.sids.get(sid);
         if (roomSet != null) {
             for (room in roomSet) {

@@ -36,6 +36,11 @@ class Namespace {
         this.enterRoom(session, session);
     }
 
+    public function removeSession(session: SessionID) {
+        this.adapter.leaveAll(session);
+        this.sessions.remove(session);
+    }
+
     public function enterRoom(sid: SessionID, room: OneOf<Room, Array<Room>>) {
         var rooms = switch (room) {
             case Left(r): [r];
@@ -73,7 +78,7 @@ class Namespace {
     }
 
     public function allDisconnect(?close=false) {
-        throw "TODO";
+        // TODO: response close
     }
 
     //

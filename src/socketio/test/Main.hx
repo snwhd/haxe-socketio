@@ -38,6 +38,7 @@ class Main {
         sio.on("test_event", function (sid, data) {
             trace('Test Event From $sid');
             sio.enterRoom(sid, "test_room");
+            sio.closeSession(sid, false);
         });
 
         sio.onCatchAll(function (event, sid, data) {

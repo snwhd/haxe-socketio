@@ -52,7 +52,6 @@ class BroadcastOperator {
     }
 
     public function emit(eventName: String, args: Dynamic) {
-        // throw "TODO";
         var opts = {
             rooms: Set.createString(),
             except: Set.createString(),
@@ -71,26 +70,6 @@ class BroadcastOperator {
     }
 
     public function emitWithAck(eventName: String, args: Dynamic) {
-        throw "TODO";
-    }
-
-    //
-    // sockets
-    //
-
-    public function fetchSockets(): Array<SessionID> {
-        throw "TODO";
-    }
-
-    public function socketsJoin(room: Room) {
-        throw "TODO";
-    }
-
-    public function socketsLeave(room: Room) {
-        throw "TODO";
-    }
-
-    public function disconnectSockets(?close=false) {
         throw "TODO";
     }
 

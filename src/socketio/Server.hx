@@ -52,26 +52,32 @@ class Server {
         }
     }
 
-    public function closeSession(sid: OneOf<SessionID, Iterator<SessionID>>) {
-        var sids: Iterator<SessionID> = switch (sid) {
-            case Left(s): [s].iterator();
-            case Right(a): a;
-        };
+    public function closeSession(
+        sid: OneOf<SessionID, Iterator<SessionID>>,
+        ?close=false
+    ): Void {
+        var client = this.sessions.get(sid);
+        if (client == null) return;
 
-        for (sid in sids) {
-            var client = this.sessions.get(sid);
-            if (client != null) {
-                this.engine.closeSession(client.eio.sid);
-                this.sessions.remove(sid);
-                var eioSessions = this.eioToSio.get(sid);
-                for (eioSid => pair in eioSessions.keyValueIterator()) {
-                    if (pair.left == sid) {
-                        eioSessions.remove(pair);
-                        break;
-                    }
-                }
+        if (close) {
+            // close the engineio connection and let it all
+            // propagate back up through engineClosed
+            this.engine.closeSession(client.eio.sid);
+            return;
+        }
+
+        var sios = this.eioToSio.get(client.eio.sid);
+        if (sios != null) {
+            for (pair in sios) if (sid == pair.left) {
+                var data = (new Packet(DISCONNECT, null)).encode();
+                this.sendString(sid, data);
+
+                var namespace = this.namespaces.get(pair.right);
+                namespace.removeSession(sid);
             }
         }
+
+        this.sessions.remove(sid);
     }
 
     //
@@ -129,7 +135,7 @@ class Server {
 
         var sid = this.getSidFromEio(eioClient, packet.namespace);
         if (sid == null || !namespace.sessions.exists(sid)) {
-            _debug("SID not in Namespace");
+            _debug('SID not in Namespace');
             return;
         }
 
@@ -202,7 +208,7 @@ class Server {
                     this.handlePacket(client, packet);
                 } catch (err) {
                     _debug('error handling packet: $err');
-                    // TODO: close client
+                    this.engine.closeSession(client.sid);
                     return;
                 }
             case PBinary(b):
@@ -211,6 +217,17 @@ class Server {
     }
 
     private function engineClosed(sid: String) {
+        _debug('eio closed: $sid');
+        var sios = this.eioToSio.get(sid);
+        if (sios != null) {
+            for (pair in sios) {
+                var namespace = this.namespaces.get(pair.right);
+                namespace.removeSession(pair.left);
+                this.sessions.remove(pair.left);
+                _debug('eio closed- ${pair.left}');
+            }
+            this.eioToSio.remove(sid);
+        }
     }
 
     //
