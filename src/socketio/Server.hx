@@ -77,6 +77,8 @@ class Server {
     ): Void {
         var namespace = this.getOrCreateNamespace(packet.namespace);
         var client = this.getOrCreateClient(eioClient, namespace);
+        if (client == null) return;
+
         var sid = client.sid;
 
         // TODO: middlewares
@@ -244,8 +246,15 @@ class Server {
 
         // new namespace connection
         var sid = this.generateSid();
+
+        try {
+            namespace.handleEvent(sid, "connect", null);
+        } catch (DenyConnection) {
+            _debug('denied $sid connection to ${namespace.name}');
+            return null;
+        }
+
         namespace.addSession(sid);
-        namespace.handleEvent(sid, "connect", null);
 
         if (sessionIds != null) {
             // existing websocket connection

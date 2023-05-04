@@ -20,6 +20,7 @@ class Main {
         // special events fired by the server
         sio.on("connect", function (sid, data) {
             trace('$sid connected');
+            // throw new socketio.DenyConnection("");
         });
 
         sio.on("create-room", function(sid, data) {
@@ -52,23 +53,6 @@ class Main {
 //
 //        // sio.registerNamespace(new CustomNamespace("/test"));
     }
-
-/* TODO
-class CustomNamespace extends socketio.Namespace {
-
-    public function on_connect(sid) {
-    }
-
-    public function on_disconnect(sid) {
-    }
-
-    // TODO: macro? how to register?
-    public function on_my_event(sid, data) {
-        self.emite("my_response", data);
-    }
-
-}
-*/
 
     public static function encodeDecodeTest() {
 
