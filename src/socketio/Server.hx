@@ -1,5 +1,7 @@
 package socketio;
 
+import haxe.ds.Either;
+
 import engineio.Server.ClientInfo as EngineioClientInfo;
 import engineio.StringOrBinary;
 
@@ -22,7 +24,7 @@ class Server {
     private var globalNamespace: Namespace;
 
     private var sessions: Map<SessionID, ClientInfo> = [];
-    private var eioToSio: Map<SessionID, Array<Tuple2<SessionID, String>>> = [];
+    private var eioToSio: Map<String, Array<Tuple2<SessionID, String>>> = [];
 
     public var debug = true;
 
@@ -47,6 +49,28 @@ class Server {
         var client = this.sessions.get(sid);
         if (client != null) {
             this.engine.sendStringMessage(client.eio, data);
+        }
+    }
+
+    public function closeSession(sid: OneOf<SessionID, Iterator<SessionID>>) {
+        var sids: Iterator<SessionID> = switch (sid) {
+            case Left(s): [s].iterator();
+            case Right(a): a;
+        };
+
+        for (sid in sids) {
+            var client = this.sessions.get(sid);
+            if (client != null) {
+                this.engine.closeSession(client.eio.sid);
+                this.sessions.remove(sid);
+                var eioSessions = this.eioToSio.get(sid);
+                for (eioSid => pair in eioSessions.keyValueIterator()) {
+                    if (pair.left == sid) {
+                        eioSessions.remove(pair);
+                        break;
+                    }
+                }
+            }
         }
     }
 

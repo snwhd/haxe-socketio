@@ -20,11 +20,12 @@ class Adapter {
     }
 
     public function init() {
-        throw "TODO";
     }
 
     public function close() {
-        throw "TODO";
+        this.namespace.server.closeSession(this.sids.keys());
+        this.rooms = [];
+        this.sids = [];
     }
 
     //
