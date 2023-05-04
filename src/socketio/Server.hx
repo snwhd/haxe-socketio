@@ -229,6 +229,26 @@ class Server {
         return this.globalNamespace.timeout(rooms);
     }
 
+    public function enterRoom(sid: SessionID, room: OneOf<Room, Array<Room>>) {
+        this.globalNamespace.enterRoom(sid, room);
+    }
+
+    public function leaveRoom(sid: SessionID, room: OneOf<Room, Array<Room>>) {
+        this.globalNamespace.leaveRoom(sid, room);
+    }
+
+    public function allEnter(room: OneOf<Room, Array<Room>>) {
+        this.globalNamespace.allEnter(room);
+    }
+
+    public function allLeave(room: OneOf<Room, Array<Room>>) {
+        this.globalNamespace.allLeave(room);
+    }
+
+    public function allDisconnect(?close=false) {
+        this.globalNamespace.allDisconnect(close);
+    }
+
     //
     // util
     //

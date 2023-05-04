@@ -31,15 +31,11 @@ class Adapter {
     // add/remove sessions
     //
 
-    public function add(sid: SessionID, rooms: Array<Room>) {
-        this.addAll(sid, rooms);
-    }
-
-    public function addAll(sid: SessionID, rooms: Array<Room>) {
+    public function enter(sid: SessionID, rooms: Array<Room>) {
         var roomSet = this.sids.get(sid);
         if (roomSet == null) {
             roomSet = Set.createString();
-            this.sids[sid]  = roomSet;
+            this.sids[sid] = roomSet;
         }
 
         for (room in rooms) {
@@ -61,13 +57,15 @@ class Adapter {
         }
     }
 
-    public function del(sid: SessionID, room: Room) {
+    public function leave(sid: SessionID, rooms: Array<Room>) {
         var roomSet = this.sids.get(sid);
-        if (roomSet != null) {
-            roomSet.remove(sid);
-        }
 
-        this.deleteFromRoom(room, sid);
+        for (room in rooms) {
+            if (roomSet != null) {
+                roomSet.remove(room);
+            }
+            this.deleteFromRoom(room, sid);
+        }
     }
 
     public function delAll(sid: SessionID) {

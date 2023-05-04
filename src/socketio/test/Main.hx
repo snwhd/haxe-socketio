@@ -29,6 +29,7 @@ class Main {
 
         sio.on("join-room", function(sid, data) {
             trace('$sid joined room: ${data.room}');
+            sio.emit("welcome", {data: data.room});
         });
 
         // TODO: disconnect, create-room, leave-room, delete-room
@@ -36,9 +37,9 @@ class Main {
         // events
         sio.on("test_event", function (sid, data) {
             trace('Test Event From $sid');
-            sio.emit("server_event", {data: "foobar"});
-            sio.of("/").emit("of_event", {data: "asdf"});
+            sio.enterRoom(sid, "test_room");
         });
+
         sio.onCatchAll(function (event, sid, data) {
             trace('$event: $sid');
         });

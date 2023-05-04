@@ -1,5 +1,6 @@
 package socketio;
 
+import haxe.ds.Either;
 import thx.Set;
 
 typedef Middleware = Dynamic;
@@ -32,18 +33,46 @@ class Namespace {
 
     public function addSession(session: SessionID) {
         this.sessions.add(session);
-        this.adapter.addAll(session, [session]);
+        this.enterRoom(session, session);
     }
 
-    public function allJoin(rooms: Array<String>) {
-        throw "TODO";
+    public function enterRoom(sid: SessionID, room: OneOf<Room, Array<Room>>) {
+        var rooms = switch (room) {
+            case Left(r): [r];
+            case Right(a): a;
+        }
+        this.adapter.enter(sid, rooms);
     }
 
-    public function allLeave(rooms: Array<String>) {
-        throw "TODO";
+    public function leaveRoom(sid: SessionID, room: OneOf<Room, Array<Room>>) {
+        var rooms = switch (room) {
+            case Left(r): [r];
+            case Right(a): a;
+        }
+        this.adapter.leave(sid, rooms);
     }
 
-    public function disconnectAll(?close=false) {
+    public function allEnter(room: OneOf<Room, Array<Room>>) {
+        var rooms = switch (room) {
+            case Left(r): [r];
+            case Right(a): a;
+        }
+        for (sid in this.sessions) {
+            this.adapter.enter(sid, rooms);
+        }
+    }
+
+    public function allLeave(room: OneOf<Room, Array<Room>>) {
+        var rooms = switch (room) {
+            case Left(r): [r];
+            case Right(a): a;
+        }
+        for (sid in this.sessions) {
+            this.adapter.leave(sid, rooms);
+        }
+    }
+
+    public function allDisconnect(?close=false) {
         throw "TODO";
     }
 
