@@ -9,7 +9,6 @@
   "releasenote": ".",
   "contributors": ["snwhd"],
   "dependencies": {
-    "haxe-engineio": "",
-    "thx.code": ""
+    "thx.core": ""
   }
 }
