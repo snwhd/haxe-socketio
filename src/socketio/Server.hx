@@ -26,7 +26,7 @@ class Server {
     private var sessions: Map<SessionID, ClientInfo> = [];
     private var eioToSio: Map<String, Array<Tuple2<SessionID, String>>> = [];
 
-    public var debug = false;
+    public var debug (default, set) = false;
 
     public function new() {
         this.globalNamespace = this.getOrCreateNamespace("/");
@@ -39,6 +39,12 @@ class Server {
 
         this.engine.startMainThread();
         this.engine.startWebsocketThread();
+    }
+
+    public function set_debug(value: Bool): Bool {
+        this.engine.debug = value;
+        this.debug = value;
+        return value;
     }
 
     //
