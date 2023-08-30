@@ -28,10 +28,20 @@ class Server {
 
     public var debug (default, set) = false;
 
-    public function new() {
+    public function new(
+        host: String = '0.0.0.0',
+        port: Int = 8080
+    ) {
         this.globalNamespace = this.getOrCreateNamespace("/");
 
-        this.engine = new engineio.Server(null, "/socket.io/");
+        this.engine = new engineio.Server(
+            null,
+            "/socket.io/",
+            25,
+            20,
+            host,
+            port
+        );
         this.engine.onOpened = this.engineOpened;
         this.engine.onUpgraded = this.engineUpgraded;
         this.engine.onMessage = this.engineMessage;
