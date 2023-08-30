@@ -28,10 +28,12 @@ class Server {
 
     public var debug (default, set) = false;
 
+    public var cors (get, set): String;
+
     public function new(
         host: String = '0.0.0.0',
         port: Int = 8080
-    ) {
+    ): Void {
         this.globalNamespace = this.getOrCreateNamespace("/");
 
         this.engine = new engineio.Server(
@@ -55,6 +57,15 @@ class Server {
         this.engine.debug = value;
         this.debug = value;
         return value;
+    }
+
+    public function set_cors(value: String): String {
+        this.engine.cors = value;
+        return value;
+    }
+
+    public function get_cors(): String {
+        return this.engine.cors;
     }
 
     //
