@@ -101,6 +101,7 @@ class Server {
 
                 var namespace = this.namespaces.get(pair.right);
                 namespace.removeSession(sid);
+                this.sendDisconnect(sid);
             }
         }
 
@@ -251,10 +252,15 @@ class Server {
                 var namespace = this.namespaces.get(pair.right);
                 namespace.removeSession(pair.left);
                 this.sessions.remove(pair.left);
-                _debug('eio closed- ${pair.left}');
+                _debug('sio closed: ${pair.left}');
+                this.sendDisconnect(pair.left);
             }
             this.eioToSio.remove(sid);
         }
+    }
+
+    private function sendDisconnect(sid: String) {
+        this.globalNamespace.handleEvent(sid, "disconnect", null);
     }
 
     //
